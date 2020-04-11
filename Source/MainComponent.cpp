@@ -52,7 +52,7 @@ MainComponent::MainComponent()
         }
         else
         {
-            // If we get here, then our attempt at locking failed because another thread had already locked it..
+            DBG("Failed to aquire lock in CONSTRUCTOR");
         }
     }
 
@@ -65,15 +65,10 @@ MainComponent::~MainComponent()
 }
 
 //==============================================================================
-void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
+void MainComponent::prepareToPlay (int samplesPerBlockExpected, double newSampleRate)
 {
-    // This function will be called when the audio device is started, or when
-    // its settings (i.e. sample rate, block size, etc) are changed.
-    
-    // You can use this function to initialise any resources you might need,
-    // but be careful - it will be called on the audio thread, not the GUI thread.
-    
-    // For more details, see the help for AudioProcessor::prepareToPlay()
+    sampleRate = newSampleRate;
+    expectedSamplesPerBlock = samplesPerBlockExpected;
 }
 
 void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
@@ -91,11 +86,28 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         }
         else
         {
-            // If we get here, then our attempt at locking failed because another thread had already locked it..
+            DBG("Failed to aquire lock in AUDIO callback");
         }
         
     }
+    
     bufferToFill.clearActiveBufferRegion();
+    auto originalPhase = phase;
+    
+    for (auto chan = 0; chan < bufferToFill.buffer->getNumChannels(); ++chan)
+    {
+        phase = originalPhase;
+        
+        auto* channelData = bufferToFill.buffer->getWritePointer (chan, bufferToFill.startSample);
+        
+        for (auto i = 0; i < bufferToFill.numSamples ; ++i)
+        {
+            channelData[i] = amplitude * std::sin (phase);
+            
+            // increment the phase step for the next sample
+            phase = std::fmod (phase + phaseDelta, MathConstants<float>::twoPi);
+        }
+    }
 }
 
 void MainComponent::releaseResources()
@@ -145,7 +157,7 @@ void MainComponent::buttonClicked (Button*)
         }
         else
         {
-            // If we get here, then our attempt at locking failed because another thread had already locked it..
+            DBG("Failed to aquire lock in GUI (button event) callback");
         }
     }
 }
@@ -164,7 +176,7 @@ void MainComponent::handleAsyncUpdate()
         }
         else
         {
-            // If we get here, then our attempt at locking failed because another thread had already locked it..
+            DBG("Failed to aquire lock in VT callback");
         }
     }
 
@@ -174,4 +186,28 @@ void MainComponent::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasCha
                                const Identifier& property)
 {
                 triggerAsyncUpdate();
+}
+
+// Mouse handling..
+void MainComponent::mouseDown (const MouseEvent& e)
+{
+    mouseDrag (e);
+}
+
+void MainComponent::mouseDrag (const MouseEvent& e)
+{
+    lastMousePosition = e.position;
+    
+    frequency = (getHeight() - e.y) * 10.0f;
+    amplitude = jmin (0.9f, 0.2f * e.position.x / getWidth());
+    
+    phaseDelta = (float) (MathConstants<double>::twoPi * frequency / sampleRate);
+    
+    repaint();
+}
+
+void MainComponent::mouseUp (const MouseEvent&)
+{
+    amplitude = 0.0f;
+    repaint();
 }

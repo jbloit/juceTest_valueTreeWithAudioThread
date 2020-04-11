@@ -67,6 +67,21 @@ private:
     
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
                                    const Identifier& property) override;
+    float phase       = 0.0f;
+    float phaseDelta  = 0.0f;
+    float frequency   = 5000.0f;
+    float amplitude   = 0.2f;
+    
+    double sampleRate = 0.0;
+    int expectedSamplesPerBlock = 0;
+    Point<float> lastMousePosition;
+    
+    void mouseDown (const MouseEvent& e) override;
+    
+    void mouseDrag (const MouseEvent& e) override;
+    
+    void mouseUp (const MouseEvent&) override;
+    
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
