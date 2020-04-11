@@ -7,11 +7,11 @@ Importantly, this code is tested with the Thread Sanitizer and seems to behave o
 The app doesn't produce sound, I should maybe at least add in a sine wave to make sure it doesn't glitch.
 
 
-##Thread safety
+## Thread safety
 I'm using a CriticalSection to ensure thread safety when reading/writing values. I'm using a try lock on the audio callback. I'm using this approach based on Thibaut Carpentier's paper: "Synchronisation de données inter-processus dans les applications audio temps réel: qu'est-ce qui débloque?" (JIM 2018).
 
-##Realtime safety
+## Realtime safety
 I'm using an AsyncUpdater so that the UI updates from the ValueTree listener happen asynchronously on the message thread after being updated on the audio thread.
 
-##Warning
+## Warning
 This code only reflects my understanding of some good practices that I have read on the Juce forums, in the Juce codebase, and from Thibaut Carpentier's paper.
