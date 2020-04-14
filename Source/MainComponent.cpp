@@ -102,10 +102,10 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         
         for (auto i = 0; i < bufferToFill.numSamples ; ++i)
         {
-            channelData[i] = amplitude * std::sin (phase);
+            channelData[i] = amplitude.get() * std::sin (phase.get());
             
             // increment the phase step for the next sample
-            phase = std::fmod (phase + phaseDelta, MathConstants<float>::twoPi);
+            phase = std::fmod (phase.get() + phaseDelta.get(), MathConstants<float>::twoPi);
         }
     }
 }
@@ -201,7 +201,7 @@ void MainComponent::mouseDrag (const MouseEvent& e)
     frequency = (getHeight() - e.y) * 10.0f;
     amplitude = jmin (0.9f, 0.2f * e.position.x / getWidth());
     
-    phaseDelta = (float) (MathConstants<double>::twoPi * frequency / sampleRate);
+    phaseDelta = (float) (MathConstants<double>::twoPi * frequency.get() / sampleRate);
     
     repaint();
 }

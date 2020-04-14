@@ -67,10 +67,12 @@ private:
     
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
                                    const Identifier& property) override;
-    float phase       = 0.0f;
-    float phaseDelta  = 0.0f;
-    float frequency   = 5000.0f;
-    float amplitude   = 0.2f;
+    
+    Atomic<float> phase {0};
+    Atomic<float> phaseDelta {0};
+    Atomic<float> frequency {5000.0f};
+    Atomic<float> amplitude {0.2f};
+
     
     double sampleRate = 0.0;
     int expectedSamplesPerBlock = 0;
